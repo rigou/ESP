@@ -61,6 +61,6 @@ fi
 echo "Ready to upload $BINPATH"
 stat $BINPATH |grep '^Modify'
 
-# the parameters passed to espota.py match values defined in rgWiFi.cpp and rgNetworkCredentials.h
+declare $OTA_PASSWORD ; source $HOME/Projects/nogit/NetworkCredentials/NetworkCredentials.sh
 declare ESPOTA=$HOME/.arduino15/packages/esp32/hardware/esp32/3.*/tools/espota.py
-python $ESPOTA -i "$ESPIP" -p 3232 -P 18266 -a OTA0314 -f "$BINPATH"
+python $ESPOTA -i "$ESPIP" -p 3232 -P 18266 -a "$OTA_PASSWORD" -f "$BINPATH"
