@@ -1,0 +1,22 @@
+SPI CLOCK FREQUENCY INFORMATION FOR ESP32
+
+Set the SPI clock frequency in the master program only with beginTransaction() :
+	const int SPI_FREQ = 10000000; // 10 MHz
+	Spi_obj->beginTransaction(SPISettings(SPI_FREQ, MSBFIRST, SPI_MODE0));
+See SPI initialization example ARDUINO/Espressif/SPI_MasterSlave/SPI_Master/SPI_Master.ino
+
+Do not set SPI clock frequency in the Slave.
+Maximum supported frequency by the ESP32 hardware in Slave mode : 10 MHz
+
+The actual clock frequency of a Device may not be exactly equal to the number you set,
+it is re-calculated by the driver to the nearest hardware-compatible number,
+and not larger than the clock frequency of the clock source.
+
+The maximum output clock frequency of ESP32 GP-SPI master is freq(APB_CLK)/2, 
+and the maximum input clock frequency of the ESP32 GP-SPI slave is freq(APB_CLK)/8. 
+The master can derive other clock frequencies via frequency division (powers of 2).
+freq(APB_CLK) of ESP32 = 80 MHz
+
+Maximum clock freq    40 MHz  when the GPIO Matrix is used (the Arduino IDE uses it)
+Lower clock freq      20 MHz, 10 MHz, 5 MHz, 2500 kHz, 1250 kHz, 625 kHz, 312500Hz
+

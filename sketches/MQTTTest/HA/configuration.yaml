@@ -1,0 +1,48 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# ma configuration
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 172.30.33.0/24
+
+mqtt: !include config_mqtt.yaml
+
+# test this global template when trying to turn an air conditioner (UNUSED)
+#binary_sensor:
+#- platform: template
+#  sensors:
+#    ac_enabled:
+#      unique_id: "ace-EihioX9h"
+#      friendly_name: Enable all AC
+#      value_template: false
+# 2025-12-05 The above "platform: template" syntax for binary_sensor is deprecated
+# I replaced it with the modern equivalent below:
+template:
+- binary_sensor:
+  - unique_id: ace-EihioX9h
+    default_entity_id: binary_sensor.ac_enabled
+    name: Enable all AC
+    state: 'False'
+
+homeassistant:
+  customize:
+    # display a thermometer icon next to the slider in the dashboard
+    # see https://www.home-assistant.io/integrations/number/
+    number.esp00_temperature:   
+        device_class: temperature
+    number.clim1_temperature:
+        device_class: temperature
+    number.clim2_temperature:
+        device_class: temperature
+    number.clim3_temperature:
+        device_class: temperature

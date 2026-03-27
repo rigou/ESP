@@ -1,0 +1,44 @@
+Espressif OTA updates for ESP32 and ESP8266
+2022-04-01, 2025-03-29
+
+Prerequisites
+	Set up port 18266 forwarding for debian104 , see screenshot
+	
+Upload binary of given app using my script OTAupload.sh:
+    OTAupload.sh BlinkOTA 192.168.2.104
+    OTAupload.sh WiFiClientOTA 192.168.2.30
+
+Notice: my script OTAupload.sh uses espota.py, which is the native command for ESP OTA
+	$ python ~/.arduino15/packages/esp32/hardware/esp32/3.1.3/tools/espota.py -h
+	Usage: espota.py [options]
+
+	Transmit image over the air to the esp32 module with OTA support.
+
+	Options:
+	  -h, --help            show this help message and exit
+
+	  Destination:
+	    -i ESP_IP, --ip=ESP_IP
+				ESP32 IP Address.
+	    -I HOST_IP, --host_ip=HOST_IP
+				Host IP Address.
+	    -p ESP_PORT, --port=ESP_PORT
+				ESP32 ota Port. Default 3232
+	    -P HOST_PORT, --host_port=HOST_PORT
+				Host server ota Port. Default random 10000-60000
+
+	  Authentication:
+	    -a AUTH, --auth=AUTH
+				Set authentication password.
+
+	  Image:
+	    -f FILE, --file=FILE
+				Image file.
+	    -s, --spiffs        Use this option to transmit a SPIFFS image and do not
+				flash the module.
+
+	  Output:
+	    -d, --debug         Show debug output. And override loglevel with debug.
+	    -r, --progress      Show progress output. Does not work for ArduinoIDE
+	    -t TIMEOUT, --timeout=TIMEOUT
+				Timeout to wait for the ESP32 to accept invitation

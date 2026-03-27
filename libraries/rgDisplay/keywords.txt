@@ -1,0 +1,28 @@
+#######################################
+# Classes, datatypes (KEYWORD1)
+#######################################
+
+rgDisplay	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+get_FontSize	KEYWORD2
+set_FontSize	KEYWORD2
+Init	KEYWORD2
+Clear	KEYWORD2
+Print	KEYWORD2
+PrintLine	KEYWORD2
+PrintAt	KEYWORD2
+Refresh	KEYWORD2
+AsyncClear	KEYWORD2
+AsyncPrintLine	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+MAXCOLS	LITERAL1
+FONT_COLS	LITERAL1
+FONT_LINES	LITERAL1
+DEF_FONT_SIZE	LITERAL1

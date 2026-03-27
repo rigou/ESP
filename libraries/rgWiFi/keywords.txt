@@ -1,0 +1,20 @@
+#######################################
+# Classes, datatypes (KEYWORD1)
+#######################################
+
+NetInfo	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+rgwifi_Reconnect	KEYWORD2
+rgwifi_Connect	KEYWORD2
+rgwifi_Disconnect	KEYWORD2
+rgwifi_Printinfo	KEYWORD2
+rgwifi_OtaSetup	KEYWORD2
+rgwifi_OtaDelay	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

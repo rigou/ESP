@@ -1,0 +1,15 @@
+lrzsz installation
+2024-12-15
+
+lrzsz is a unix communication package providing the XMODEM, YMODEM ZMODEM file transfer protocols.
+
+Download lrzsz-0.12.20.tar.gz from https://ohse.de/uwe/software/lrzsz.html
+
+tar xf lrzsz-0.12.20.tar.gz 
+cd lrzsz-0.12.20
+CFLAGS=-O2 ./configure --enable-syslog=optional --prefix=/usr/local
+make
+make vcheck
+sudo make install
+
+sudo mv lrzsz-0.12.20.tar.gz /usr/local/src

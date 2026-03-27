@@ -1,0 +1,15 @@
+#######################################
+# Classes, datatypes (KEYWORD1)
+#######################################
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+rgcarrier_init	KEYWORD2
+rgcarrier_start	KEYWORD2
+rgcarrier_stop	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

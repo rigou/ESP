@@ -1,0 +1,19 @@
+User parameters documentation
+
+CSV File format:
+	end of line character is '\n', any '\r' is ignored
+	empty lines and blank lines are ignored
+	values separator is ','
+	any space characters preceeding or following the separator are ignored
+	any space characters at the beginning or at the end of a line are ignored
+	comments start with '#' and are ignored
+	Values: signed integers < 32768
+
+Transmitter variables:
+
+DEFMOD : default model file name (8.3 name format)
+
+BATMIN : minimum voltage required for Tx operation, an alarm is triggered when voltage gets
+	lower. ESP-WROOM-32 requires 3.3V and the AMS1117 max dropout is 1.3V so min VBat=4.6V
+	- set BATMIN=4600 for a 5V power supply
+	- set BATMIN=7500 for a LiPo 2S battery to prevent over-discharge

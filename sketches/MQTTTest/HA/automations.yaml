@@ -1,0 +1,158 @@
+- id: '1739789010211'
+  alias: Présence séjour - Prise On
+  description: ''
+  triggers:
+  - trigger: sun
+    event: sunset
+    offset: 0
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      device_id: f0ed8a55bf6d0666a7f25415872fcf41
+  mode: single
+- id: '1739789116247'
+  alias: Présence séjour - Prise Off
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:00:00'
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: f0ed8a55bf6d0666a7f25415872fcf41
+  mode: single
+- id: '1746437781690'
+  alias: Extinction lumière bureau
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:59:00'
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: def4d4526882cae70805dcdc5890612e
+  mode: single
+- id: '1749487477859'
+  alias: Allumage Prise Etabli
+  description: ''
+  triggers:
+  - trigger: time
+    at: 07:00:00
+  conditions: []
+  actions:
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      device_id: a064ee701ab9e9e1ba1bd321396b0a57
+  mode: single
+- id: '1749487566061'
+  alias: Extinction Prise Etabli
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:00:00'
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: a064ee701ab9e9e1ba1bd321396b0a57
+  mode: single
+- id: '1749487698996'
+  alias: Extinction Prise Imprimante
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:00:00'
+  conditions: []
+  actions:
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 16139eefac16cd9109ff0ed2d6490009
+  mode: single
+- id: '1763919923515'
+  alias: Extinction Lampadaire
+  description: ''
+  triggers:
+  - trigger: time
+    at: '23:59:59'
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.lampadaire
+  mode: single
+- id: '1767001930598'
+  alias: Extinction toutes lumières
+  description: ''
+  triggers:
+  - trigger: time
+    at: '10:30:00'
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id:
+      - light.prise
+      - light.lampadaire
+      - light.lumiere_bureau
+      - light.bureau_stefania
+      - light.ampoule_chambre
+    data: {}
+  mode: single
+- id: '1767685890905'
+  alias: ESP32 Device turns light on
+  description: Turns on the light when the Button state of the ESP32 device > 0
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.esp32_device_esp_dafde8_button
+    above: 0
+  conditions: []
+  actions:
+  - action: light.turn_on
+    metadata: {}
+    target:
+      entity_id: light.lumiere_bureau
+    data: {}
+  mode: single
+- id: '1767689717626'
+  alias: ESP32 Device turns light off
+  description: Turns off the light when the Button state of the ESP32 device < 1
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.esp32_device_esp_dafde8_button
+    below: 1
+  conditions: []
+  actions:
+  - action: light.turn_off
+    metadata: {}
+    target:
+      entity_id: light.lumiere_bureau
+    data: {}
+  mode: single

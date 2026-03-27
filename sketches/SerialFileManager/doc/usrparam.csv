@@ -1,0 +1,6 @@
+# Application parameters
+# Line length 25 chr max
+# Do not change the order
+# of the lines
+DEFMOD,usrmodel.csv
+BATMIN,4600

@@ -1,0 +1,26 @@
+void setup() {
+	Serial.begin(115200);
+	while (!Serial);
+	for (int idx=0; idx<=5; ++idx) {
+		Serial.print(".");
+		delay(100);
+	}
+    Serial.println(' ');
+    
+    Serial.printf("byte=%d, short=%d, int=%d, long=%d, long long=%d\n",
+        sizeof(byte), sizeof(short), sizeof(int), sizeof(long), sizeof(long long)
+    );
+    Serial.printf("uint8_t=%d, uint16_t=%d, uint32_t=%d, uint64_t=%d\n",
+        sizeof(uint8_t), sizeof(uint16_t), sizeof(uint32_t), sizeof(uint64_t)
+    );
+    Serial.printf("float=%d, double=%d\n",
+        sizeof(float), sizeof(double)
+    );
+}
+
+void loop() {}
+
+OUTPUT:
+	byte=1, short=2, int=4, long=4, long long=8
+	uint8_t=1, uint16_t=2, uint32_t=4, uint64_t=8
+	float=4, double=8

@@ -1,0 +1,8 @@
+# Application parameters
+# Line length 25 chr max
+# Do not change the order
+# of the lines
+TXID,256
+RXID,512
+MONOCHAN,64
+PALEVEL,0
