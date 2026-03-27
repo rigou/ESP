@@ -1,6 +1,8 @@
-Non standard configuration : changes made to my Arduino configuration
-to move my sketches and libraries into the folder $HOME/Projects/ESP
-2026-03-27
+2026-03-27 - This public repository contains the files that were previously 
+stored in my private repos "Espressif" and "libraries".
+
+Here are the changes I made to my Arduino configuration
+to move my sketches and libraries into the folder $HOME/Projects/ESP :
 
 in $HOME:
 deleted symling Arduino -> ./Projects/Arduino
