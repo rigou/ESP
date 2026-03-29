@@ -2,7 +2,7 @@
 // this program uses the arduino-mqtt library by Joël Gähwiler, which is installed in Projects/Arduino/libraries/MQTT
 // (install it with the Arduino IDE Library manager)
 // https://github.com/256dpi/arduino-mqtt
-// 2026-01-05
+// 2026-03-28
 
 /* Best Practices for Designing MQTT Message Topics
     1) Omit Leading Forward Slash in Topics: Avoid using a leading forward slash
@@ -18,8 +18,8 @@
 */
 
 /*  Build commands:
-        cd $HOME/Projects
-        compile and upload via USB:	$HOME/Projects/Espressif/bwacli.sh MQTTTest -u ttyUSB0
+        cd $HOME/Projects/ESP/sketches
+        compile and upload via USB:	$HOME/Projects/ESP/sketches/bwacli.sh MQTTTest -u ttyUSB0
 
     Test commands:
     	terminal #1: mosquitto_sub -h nodex.local -u demo -P demo -v -t esp04/Button/get
@@ -86,10 +86,10 @@ static struct Mqtt_Message {
 // In this example, the following topics control the state of a fictional equipment controlled by the ESP32 device :
 // Subscribed topics - function connect() makes the subscriptions:
 //      "MQTT_CLID/Power/set"			HA turns power on/off ('1'=on, '0'=off) of the controlled equipment
-//      "MQTT_CLID/Temperature/set" 	HA sets the temperature on the thermostat of the controlled equipment
+//      "MQTT_CLID/Temp/set" 	        HA sets the temperature on the thermostat of the controlled equipment
 // Published topics - made by functions loop() and publish_status():
 //      "MQTT_CLID/Power/get"			HA reads power state of of the controlled equipment
-//      "MQTT_CLID/Temperature/get" 	HA reads the temperature set on the thermostat of the controlled equipment
+//      "MQTT_CLID/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
 //      "MQTT_CLID/Button/get"          HA reads the push button ('1'=closed, '0'=open)
 //      "MQTT_CLID/Info/get"			HA reads our status and misc information
 
@@ -97,7 +97,7 @@ static struct Mqtt_Message {
 struct DeviceState {
     // MQTT-related
 	unsigned int Power=0; 	// 0=off, 1=on
-	unsigned int Temperature=0;
+	unsigned int Temp=0;
 	unsigned int Button=0;
     bool Changed=false; // true=update settings file
 
@@ -137,7 +137,7 @@ void setup() {
             EndProgram("read settings file error", false);
         }
         FPar_obj.GetKeyInt("Power", &State.Power);
-        FPar_obj.GetKeyInt("Temp", &State.Temperature);
+        FPar_obj.GetKeyInt("Temp", &State.Temp);
         FPar_obj.GetKeyInt("Button", &State.Button);
     }
     else {
@@ -191,11 +191,11 @@ void loop() {
         }
 
         // persist the device state into the settings file
-        // update the settings file every 60 seconds (Flash memory life = 10.000 writes)
+        // update the settings file not faster than once every 60 seconds (Flash memory life = 10.000 writes)
         static unsigned long Last_file_update=0;
         if (State.Changed && millis()-Last_file_update>=60000) {
             FPar_obj.SetKeyInt("Power", State.Power);
-            FPar_obj.SetKeyInt("Temp", State.Temperature);
+            FPar_obj.SetKeyInt("Temp", State.Temp);
             FPar_obj.SetKeyInt("Button", State.Button);
             if (FPar_obj.Save() < 0) {
                 EndProgram("write settings file error", false);
@@ -212,6 +212,74 @@ void loop() {
     else
         InterruptDelay(5000);
 }
+
+void subscribe(void) {
+    // add subscriptions here
+    subscribe("Power", "set");
+    subscribe("Temp", "set");         
+}
+
+void process_message(void) {
+    dbprintf("process_message %s : \"%s\"\n", Msg.fulltopic, Msg.payload);
+    const char *topic_name = nullptr;
+    const char *topic_suffix = nullptr;
+    if (parse_topic(&topic_name, &topic_suffix)) {
+        if (strcmp(topic_name, "Power") == 0) {
+            if (strcmp(topic_suffix, "set") == 0) {
+                State.Power = atoi(Msg.payload);
+                State.Changed = true;
+                // set the power of the controlled equipment accordingly
+                digitalWrite(POWERLED_GPIO, State.Power);
+                publish(topic_name, State.Power);
+            }
+        }
+        else if (strcmp(topic_name, "Temp") == 0) {
+            if (strcmp(topic_suffix, "set") == 0) {
+                State.Temp = atoi(Msg.payload);
+                State.Changed = true;
+                // set the temperature of the thermostat on the controlled equipment accordingly (not implemented in this example)
+                publish(topic_name, State.Temp);
+            }
+        }
+     }
+    else {
+        dbprintf("process_message() failed: invalid topic %s\n", Msg.fulltopic);
+    }
+}
+
+bool publish_status(void) {
+	trprintln(__func__);
+	bool retval=false;
+	retval  = publish("Power", State.Power);
+	retval &= publish("Temp", State.Temp);
+	retval &= publish("Button", State.Button);
+	retval &= publish("Info", get_info_payload());
+	return retval;
+}
+
+// compose a json digest of the device state
+// {
+//   "app_name": "MQTTTest",
+//   "app_version": "v1.4.0",
+//   "power": 0,
+//   "temperature": 55,
+//   "button": 1,
+//   "ip": "192.168.2.164"
+// }
+char *get_info_payload(void) {
+	trprintln(__func__);
+	const int JSON_BUFFER_SIZE=PAYLOAD_LEN;
+	static char msg_buffer[JSON_BUFFER_SIZE+1];
+	snprintf(msg_buffer, JSON_BUFFER_SIZE,
+		"{\"app_name\":\"%s\",\"app_version\":\"%s\",\"power\":%d,\"temperature\":%d,\"button\":%d,\"ip\":\"%s\"}",
+		APP_NAME, APP_VERSION, State.Power, State.Temp, State.Button, State.LocalIp.toString().c_str()
+	);
+	return msg_buffer;
+}
+
+// DO NOT CHANGE ANYTHING AFTER THIS LINE -------------------------------------
+
+static char Full_Topic_Buffer[FULLTOPIC_LEN+1]; // used by publish() and subscribe()
 
 // Connect to WiFi if not already done, connect to the MQTT broker and subscribe to topics
 // Return value: true=fully connected to WiFi and MQTT broker
@@ -240,10 +308,7 @@ bool connect() {
         if (!MqttClient_obj.connected()) {
             if (MqttClient_obj.connect(State.MqttClid, MQTT_USER, MQTT_PASSWD)) {
                 dbprintf("%s connected to MQTT broker %s with client ID %s\n", State.Hostname, MQTT_HOST, State.MqttClid);
-
-                // add subscriptions here
-                subscribe("Power", "set"); // subscribe to "/esp00/Power/set"
-                subscribe("Temperature", "set");
+                subscribe();
                 retval=true;
             }
             else
@@ -255,68 +320,6 @@ bool connect() {
 
     return retval;
 }
-
-void process_message(void) {
-    dbprintf("process_message %s : \"%s\"\n", Msg.fulltopic, Msg.payload);
-    const char *topic_name = nullptr;
-    const char *topic_suffix = nullptr;
-    if (parse_topic(&topic_name, &topic_suffix)) {
-        if (strcmp(topic_name, "Power") == 0) {
-            if (strcmp(topic_suffix, "set") == 0) {
-                State.Power = atoi(Msg.payload);
-                State.Changed = true;
-                // set the power of the controlled equipment accordingly
-                digitalWrite(POWERLED_GPIO, State.Power);
-                publish(topic_name, State.Power);
-            }
-        }
-        else if (strcmp(topic_name, "Temperature") == 0) {
-            if (strcmp(topic_suffix, "set") == 0) {
-                State.Temperature = atoi(Msg.payload);
-                State.Changed = true;
-                // set the temperature of the thermostat on the controlled equipment accordingly (not implemented in this example)
-                publish(topic_name, State.Temperature);
-            }
-        }
-     }
-    else {
-        dbprintf("process_message() failed: invalid topic %s\n", Msg.fulltopic);
-    }
-}
-
-bool publish_status(void) {
-	trprintln(__func__);
-	bool retval=false;
-	retval  = publish("Power", State.Power);
-	retval &= publish("Temperature", State.Temperature);
-	retval &= publish("Button", State.Button);
-	retval &= publish("Info", get_info_payload());
-	return retval;
-}
-
-// compose a json digest of the device state
-// {
-//   "app_name": "MQTTTest",
-//   "app_version": "v1.4.0",
-//   "power": 0,
-//   "temperature": 55,
-//   "button": 1,
-//   "ip": "192.168.2.164"
-// }
-char *get_info_payload(void) {
-	trprintln(__func__);
-	const int JSON_BUFFER_SIZE=PAYLOAD_LEN;
-	static char msg_buffer[JSON_BUFFER_SIZE+1];
-	snprintf(msg_buffer, JSON_BUFFER_SIZE,
-		"{\"app_name\":\"%s\",\"app_version\":\"%s\",\"power\":%d,\"temperature\":%d,\"button\":%d,\"ip\":\"%s\"}",
-		APP_NAME, APP_VERSION, State.Power, State.Temperature, State.Button, State.LocalIp.toString().c_str()
-	);
-	return msg_buffer;
-}
-
-// DO NOT CHANGE ANYTHING AFTER THIS LINE -------------------------------------
-
-static char Full_Topic_Buffer[FULLTOPIC_LEN+1]; // used by publish() and subscribe()
     
 // publish given payload c-string to given topic on the mqtt broker
 // topic_name is the name of the topic, eg "Power", "Switch" ...

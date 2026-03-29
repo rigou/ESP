@@ -1,7 +1,7 @@
 #pragma once
 
 #define APP_NAME "MQTTTest"
-#define APP_VERSION "v1.4.2"
+#define APP_VERSION "v1.5.0"
 
 #ifndef BUILTIN_LED
 #define BUILTIN_LED 2
@@ -18,10 +18,10 @@
 // #define OTA_PASSWORD_SHA256    "0681db9841c78b52e7daeb49aa05457d9fdb7ae92cba5f22d709377e5bf5247e"
 
 // Set these credentials for your network
-// #define WIFI_SSID   "xxxxxxxx"
-// #define WIFI_PASSWD "xxxxxxxx"
-// #define MQTT_HOST   "xxxxxxxx" // the hostname of the MQTT broker, IP or FQDN
-// #define MQTT_USER   "xxxxxxxx"
-// #define MQTT_PASSWD "xxxxxxxx"
+// #define WIFI_SSID   "xxxxxx"
+// #define WIFI_PASSWD "xxxxxx"
+// #define MQTT_HOST   "xxxxxx" // the hostname of the MQTT broker, IP or FQDN ; public.cloud.shiftr.io for testing
+// #define MQTT_USER   "xxxxxx"
+// #define MQTT_PASSWD "xxxxxx"
 // and delete this line :
 #include "/home/rigou/Projects/nogit/NetworkCredentials/NetworkCredentials.h"

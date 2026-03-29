@@ -1,5 +1,5 @@
 # config_mqtt_MQTTTest.yml - Send/receive data to/from ESP32 over MQTT
-# 2026-03-06
+# 2026-03-29
 - switch: 
     # Send/receive "0" or "1" to/from the MQTT device, 
     # render the value on the dashboard as a switch
@@ -26,8 +26,8 @@
     # render the value on the dashboard as a slider
     unique_id: "esp-dafde8-temperature"
     name: "esp-dafde8 Temperature"
-    state_topic: "esp-dafde8/Temperature/get" # read the current temperature
-    command_topic: "esp-dafde8/Temperature/set" # change the current temperature
+    state_topic: "esp-dafde8/Temp/get" # read the current temperature
+    command_topic: "esp-dafde8/Temp/set" # change the current temperature
     qos: 0
     device: {
       identifiers: ["esp-dafde8"],
