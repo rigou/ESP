@@ -80,18 +80,18 @@ static struct Mqtt_Message {
 
 // Topics are named from the MQTT broker's perspective, their names are case-sensitive
 // Topics names are made of 3 words separated by 2 '/' : prefix / topic_name / suffix
-//      MQTT_CLID is the prefix, and the suffix is "get" or "set"
+//      MqttClid is the prefix, and the suffix is "get" or "set"
 // * we subscribe to the "set" topics, and we execute the corresponding commands upon receiving a message from Home Assistant (HA)
 // * we publish to the "get" topics when our internal state changes, HA subscribes to these topics and processes them
 // In this example, the following topics control the state of a fictional equipment controlled by the ESP32 device :
 // Subscribed topics - function connect() makes the subscriptions:
-//      "MQTT_CLID/Power/set"			HA turns power on/off ('1'=on, '0'=off) of the controlled equipment
-//      "MQTT_CLID/Temp/set" 	        HA sets the temperature on the thermostat of the controlled equipment
+//      "MqttClid/Power/set"			HA turns power on/off ('1'=on, '0'=off) of the controlled equipment
+//      "MqttClid/Temp/set" 	        HA sets the temperature on the thermostat of the controlled equipment
 // Published topics - made by functions loop() and publish_status():
-//      "MQTT_CLID/Power/get"			HA reads power state of of the controlled equipment
-//      "MQTT_CLID/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
-//      "MQTT_CLID/Button/get"          HA reads the push button ('1'=closed, '0'=open)
-//      "MQTT_CLID/Info/get"			HA reads our status and misc information
+//      "MqttClid/Power/get"			HA reads power state of of the controlled equipment
+//      "MqttClid/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
+//      "MqttClid/Button/get"          HA reads the push button ('1'=closed, '0'=open)
+//      "MqttClid/Info/get"			HA reads our status and misc information
 
 // Device state storage
 struct DeviceState {
@@ -293,6 +293,8 @@ bool connect() {
     }
     if (WiFi.status() == WL_CONNECTED) {
         // generate a unique hostname from the wifi adapter mac address
+        // A hostname can only include ASCII letters (a-z, A-Z), digits (0-9), and hyphens (-).
+        // It must not start or end with a hyphen and cannot contain spaces or special characters like underscores
         byte mac_address[6];
         WiFi.macAddress(mac_address);
         sprintf(State.Hostname, "esp-%02x%02x%02x", mac_address[3], mac_address[4], mac_address[5]);
