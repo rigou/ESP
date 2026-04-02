@@ -1,0 +1,101 @@
+# config_mqtt_dev_esp-dafde8.yaml - breadboard
+# 2026-04-02
+
+# Home Assistant naming rules :
+# "unique_id" and "identifiers" can only include ASCII letters (a-z, A-Z), digits (0-9), and underscores
+# "name" can include any UTF-8 characters, it is the label displayed in the dashboard
+
+# Breadboard
+- switch: 
+    # Send/receive "0" or "1" to/from the MQTT device, 
+    # render the value on the dashboard as a switch
+    unique_id: "esp_dafde8_power"
+    name: "Power"
+    state_topic: "esp-dafde8/Power/get" # read the current state of the AC power
+    command_topic: "esp-dafde8/Power/set" # turn the AC power on/off
+    qos: 0
+    payload_on: 1
+    payload_off: 0
+    optimistic: false
+    device: { 
+      # the contents of this map must be the same for all entities of the esp-dafde8 device
+      # so they are grouped together and show as a single device in Settings / Devices
+      # set these values to match your own environment
+      identifiers: ["esp_dafde8"],
+      manufacturer: "rigou",
+      model: "nodemcu",
+      name: "esp-dafde8",
+      suggested_area: Bureau
+    } 
+- number: 
+    # Send/receive an integer value to/from the MQTT device,
+    # render the value on the dashboard as a slider
+    unique_id: "esp_dafde8_temperature"
+    name: "Temperature"
+    state_topic: "esp-dafde8/Temp/get" # read the current temperature
+    command_topic: "esp-dafde8/Temp/set" # change the current temperature
+    qos: 0
+    device: {
+      identifiers: ["esp_dafde8"],
+      manufacturer: "rigou",
+      model: "nodemcu",
+      name: "esp-dafde8",
+      suggested_area: Bureau
+    }
+- sensor:
+    # This example shows how to receive a json object from the MQTT device
+    #    and use one of its members as the value of this sensor, which will be
+    #    rendered on the dashboard as read-only text with: 
+    #       {{ states("sensor.esp-dafde8_version") }}
+    #    the json object used here is read with the topic: "esp-dafde8/Info/get"
+    #       {
+    #           "app_name": "MQTTTest",
+    #           "app_version": "v1.4.0",
+    #           "power": 0,
+    #           "temperature": 55,
+    #           "button": 1,
+    #           "ip": "192.168.2.164"
+    #       }
+    # extract the "app_version" field of the json value of the "Info" topic
+    # render the value on the dashboard as a string
+    unique_id: "esp_dafde8_version"
+    name: "Version"
+    state_topic: "esp-dafde8/Info/get"
+    qos: 0
+    value_template: "{{ value_json.app_name }} {{ value_json.app_version }}"
+    device: {
+      identifiers: ["esp_dafde8"],
+      manufacturer: "rigou",
+      model: "nodemcu",
+      name: "esp-dafde8",
+      suggested_area: Bureau
+    } 
+- sensor:
+    # extract the "ip" field of the json value of the "Info" topic
+    # render the value on the dashboard as a string
+    unique_id: "esp_dafde8_ip"
+    name: "Ip"
+    state_topic: "esp-dafde8/Info/get"
+    qos: 0
+    value_template: "{{ value_json.ip }}"
+    device: {
+      identifiers: ["esp_dafde8"],
+      manufacturer: "rigou",
+      model: "nodemcu",
+      name: "esp-dafde8",
+      suggested_area: Bureau
+    } 
+- sensor:
+    # Receive "0" or "1" from the MQTT device
+    # render the value on the dashboard as a string
+    unique_id: "esp_dafde8_button"
+    name: "Button"
+    state_topic: "esp-dafde8/Button/get"
+    qos: 0
+    device: {
+      identifiers: ["esp_dafde8"],
+      manufacturer: "rigou",
+      model: "nodemcu",
+      name: "esp-dafde8",
+      suggested_area: Bureau
+    } 

@@ -9,5 +9,5 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-# my configuration
+# Manually configured MQTT entities
 mqtt: !include_dir_merge_list mqtt/
