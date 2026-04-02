@@ -2,7 +2,7 @@
 # 2026-04-02
 
 # Home Assistant naming rules :
-# "unique_id" and "identifiers" can only include ASCII letters (a-z, A-Z), digits (0-9), and underscores
+# "unique_id" and "identifiers" can only include ASCII lowercase letters (a-z), digits (0-9), and underscores
 # "name" can include any UTF-8 characters, it is the label displayed in the dashboard
 
 # YAML syntax checker: https://www.yamllint.com/
@@ -15,17 +15,17 @@
     name: "Power"
     state_topic: "esp-dafde8/Power/get" # read the current state of the AC power
     command_topic: "esp-dafde8/Power/set" # turn the AC power on/off
-    qos: &DEF_QOS 0
     payload_on: 1
     payload_off: 0
     optimistic: false
+    qos: &DEF_QOS 0
     device: &DEVICE { 
       # the contents of this map must be the same for all entities of the esp-dafde8 device
       # so they are grouped together and show as a single device in Settings / Devices
       # set these values to match your own environment
       identifiers: ["esp_dafde8"],
       manufacturer: "rigou",
-      model: "nodemcu",
+      model: "nodemcu breadboard",
       name: "esp-dafde8",
       suggested_area: Bureau
     }
@@ -59,8 +59,8 @@
     unique_id: "esp_dafde8_version"
     name: "Version"
     state_topic: "esp-dafde8/Info/get"
-    qos: *DEF_QOS
     value_template: "{{ value_json.app_name }} {{ value_json.app_version }}"
+    qos: *DEF_QOS
     device: *DEVICE
 
 - sensor:
@@ -69,8 +69,8 @@
     unique_id: "esp_dafde8_ip"
     name: "Ip"
     state_topic: "esp-dafde8/Info/get"
-    qos: *DEF_QOS
     value_template: "{{ value_json.ip }}"
+    qos: *DEF_QOS
     device: *DEVICE
 
 - sensor:
