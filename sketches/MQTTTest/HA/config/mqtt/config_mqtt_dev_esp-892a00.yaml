@@ -19,15 +19,15 @@
     payload_on: 1
     payload_off: 0
     optimistic: false
-    device: { 
+    device: &DEVICE { 
       # the contents of this map must be the same for all entities of the esp_892a00 device
       # so they are grouped together and show as a single device in Settings / Devices
       # set these values to match your own environment
-      identifiers: &DEV_IDS ["esp_892a00"],
-      manufacturer: &DEV_MAN "rigou",
-      model: &DEV_MOD "nodemcu violet board",
-      name: &DEV_NAM "esp-892a00",
-      suggested_area: &DEV_ARE Bureau
+      identifiers: ["esp_892a00"],
+      manufacturer: "rigou",
+      model: "nodemcu violet board",
+      name: "esp-892a00",
+      suggested_area: Bureau
     } 
 
 - number: 
@@ -38,7 +38,7 @@
     state_topic: "esp-892a00/Temp/get" # read the current temperature
     command_topic: "esp-892a00/Temp/set" # change the current temperature
     qos: *DEF_QOS
-    device: { identifiers: *DEV_IDS, manufacturer: *DEV_MAN, model: *DEV_MOD, name: *DEV_NAM, suggested_area: *DEV_ARE }
+    device: *DEVICE
 
 - sensor:
     # This example shows how to receive a json object from the MQTT device
@@ -61,7 +61,7 @@
     state_topic: "esp-892a00/Info/get"
     qos: *DEF_QOS
     value_template: "{{ value_json.app_name }} {{ value_json.app_version }}"
-    device: { identifiers: *DEV_IDS, manufacturer: *DEV_MAN, model: *DEV_MOD, name: *DEV_NAM, suggested_area: *DEV_ARE }
+    device: *DEVICE
 
 - sensor:
     # extract the "ip" field of the json value of the "Info" topic
@@ -71,7 +71,7 @@
     state_topic: "esp-892a00/Info/get"
     qos: *DEF_QOS
     value_template: "{{ value_json.ip }}"
-    device: { identifiers: *DEV_IDS, manufacturer: *DEV_MAN, model: *DEV_MOD, name: *DEV_NAM, suggested_area: *DEV_ARE }
+    device: *DEVICE
 
 - sensor:
     # Receive "0" or "1" from the MQTT device
@@ -80,4 +80,4 @@
     name: "Button"
     state_topic: "esp-892a00/Button/get"
     qos: *DEF_QOS
-    device: { identifiers: *DEV_IDS, manufacturer: *DEV_MAN, model: *DEV_MOD, name: *DEV_NAM, suggested_area: *DEV_ARE }
+    device: *DEVICE
