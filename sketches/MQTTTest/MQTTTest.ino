@@ -1,5 +1,5 @@
-// arduino-mqtt_example.ino - arduino-mqtt library usage example
-// this program uses the arduino-mqtt library by Joël Gähwiler, which is installed in Projects/Arduino/libraries/MQTT
+// MQTTTest.ino - MQTT client example example
+// this program uses the arduino-mqtt library by Joël Gähwiler, which is installed in Projects/ESP/libraries/MQTT
 // (install it with the Arduino IDE Library manager)
 // https://github.com/256dpi/arduino-mqtt
 // 2026-04-03
@@ -90,8 +90,8 @@ static struct Mqtt_Message {
 // Published topics - made by functions loop() and publish_device_state():
 //      "MqttClid/Power/get"			HA reads power state of of the controlled equipment
 //      "MqttClid/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
-//      "MqttClid/Button/get"          HA reads the push button ('1'=closed, '0'=open)
-//      "MqttClid/Info/get"			HA reads our status and misc information
+//      "MqttClid/Button/get"           HA reads the push button ('1'=closed, '0'=open)
+//      "MqttClid/Info/get"			    HA reads our status and misc information
 
 // Device state storage
 struct DeviceState {
