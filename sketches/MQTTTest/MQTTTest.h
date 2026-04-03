@@ -1,7 +1,7 @@
 #pragma once
 
 #define APP_NAME "MQTTTest"
-#define APP_VERSION "v1.5.0"
+#define APP_VERSION "v1.6.1"
 
 #ifndef BUILTIN_LED
 #define BUILTIN_LED 2

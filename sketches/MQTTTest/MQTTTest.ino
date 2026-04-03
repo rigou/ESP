@@ -2,7 +2,7 @@
 // this program uses the arduino-mqtt library by Joël Gähwiler, which is installed in Projects/Arduino/libraries/MQTT
 // (install it with the Arduino IDE Library manager)
 // https://github.com/256dpi/arduino-mqtt
-// 2026-03-28
+// 2026-04-03
 
 /* Best Practices for Designing MQTT Message Topics
     1) Omit Leading Forward Slash in Topics: Avoid using a leading forward slash
@@ -61,12 +61,12 @@ WiFiClient WifiClient_obj;
 // The receiving of messages is constrained by the read buffer, which may be increased if necessary.
 // To change the read buffer size, you need to use MQTTClient MqttClient_obj(256) or MQTTClient MqttClient_obj(256, 128)
 // (128 bytes is enough for the write buffer because the message payload is sent directly during publishing)
-MQTTClient MqttClient_obj(256);
+MQTTClient MqttClient_obj(128);
 
 // Full topic format is like "client_id/topic/get" or "client_id/topic/set". No leading slash.
 const int FULLTOPIC_LEN=30;
-// The max payload length is 108 in this example
-const int PAYLOAD_LEN=120;
+// The max payload length is 76 in this example, see get_info_payload()
+const int PAYLOAD_LEN=76;
 
 // contents of the latest received message, set by onMsg()
 // if the next message arrives before the processing of this data is complete
@@ -87,7 +87,7 @@ static struct Mqtt_Message {
 // Subscribed topics - function connect() makes the subscriptions:
 //      "MqttClid/Power/set"			HA turns power on/off ('1'=on, '0'=off) of the controlled equipment
 //      "MqttClid/Temp/set" 	        HA sets the temperature on the thermostat of the controlled equipment
-// Published topics - made by functions loop() and publish_status():
+// Published topics - made by functions loop() and publish_device_state():
 //      "MqttClid/Power/get"			HA reads power state of of the controlled equipment
 //      "MqttClid/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
 //      "MqttClid/Button/get"          HA reads the push button ('1'=closed, '0'=open)
@@ -159,6 +159,7 @@ void loop() {
     if (!connected) {
         connected=connect();
         if (connected) {
+            publish_device_state();
 #ifdef OTA_ENABLED
             if (!Ota_initialized) { // no need to redo ota initialization after reconnecting wifi
                 OTASetup(State.Hostname, OTA_PASSWORD_SHA256);
@@ -173,7 +174,7 @@ void loop() {
 		if (Button_obj.getSingleDebouncedRelease()) {
 			State.Button = !State.Button; // toggle the button state
             State.Changed=true;
-			publish("Button", State.Button);
+			publish_device_state();
 		}
 
         MqttClient_obj.loop();
@@ -181,13 +182,6 @@ void loop() {
         if (Msg.available) {
             process_message();
             Msg.available=false;
-        }
-
-        // publish the device status every 10 seconds
-        static unsigned long Last_status_update=0;
-        if (Last_status_update==0 || millis()-Last_status_update>=10000) {
-            publish_status();
-            Last_status_update=millis();
         }
 
         // persist the device state into the settings file
@@ -230,7 +224,6 @@ void process_message(void) {
                 State.Changed = true;
                 // set the power of the controlled equipment accordingly
                 digitalWrite(POWERLED_GPIO, State.Power);
-                publish(topic_name, State.Power);
             }
         }
         else if (strcmp(topic_name, "Temp") == 0) {
@@ -238,16 +231,16 @@ void process_message(void) {
                 State.Temp = atoi(Msg.payload);
                 State.Changed = true;
                 // set the temperature of the thermostat on the controlled equipment accordingly (not implemented in this example)
-                publish(topic_name, State.Temp);
             }
         }
+        publish_device_state();
      }
     else {
         dbprintf("process_message() failed: invalid topic %s\n", Msg.fulltopic);
     }
 }
 
-bool publish_status(void) {
+bool publish_device_state(void) {
 	trprintln(__func__);
 	bool retval=false;
 	retval  = publish("Power", State.Power);
@@ -261,20 +254,16 @@ bool publish_status(void) {
 // {
 //   "app_name": "MQTTTest",
 //   "app_version": "v1.4.0",
-//   "power": 0,
-//   "temperature": 55,
-//   "button": 1,
 //   "ip": "192.168.2.164"
 // }
 char *get_info_payload(void) {
 	trprintln(__func__);
-	const int JSON_BUFFER_SIZE=PAYLOAD_LEN;
-	static char msg_buffer[JSON_BUFFER_SIZE+1];
-	snprintf(msg_buffer, JSON_BUFFER_SIZE,
-		"{\"app_name\":\"%s\",\"app_version\":\"%s\",\"power\":%d,\"temperature\":%d,\"button\":%d,\"ip\":\"%s\"}",
-		APP_NAME, APP_VERSION, State.Power, State.Temp, State.Button, State.LocalIp.toString().c_str()
+	static char json_buffer[PAYLOAD_LEN+1];
+	snprintf(json_buffer, PAYLOAD_LEN,
+		"{\"app_name\":\"%s\",\"app_version\":\"%s\",\"ip\":\"%s\"}",
+		APP_NAME, APP_VERSION, State.LocalIp.toString().c_str()
 	);
-	return msg_buffer;
+	return json_buffer; // 76 characters max : {"app_name":"123456789abc","app_version":"v12.34.56","ip":"192.168.111.222"}
 }
 
 // DO NOT CHANGE ANYTHING AFTER THIS LINE -------------------------------------
