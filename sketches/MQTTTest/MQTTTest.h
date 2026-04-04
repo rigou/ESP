@@ -1,7 +1,7 @@
 #pragma once
 
-#define APP_NAME "MQTTTest"
-#define APP_VERSION "v1.6.1"
+#define APP_NAME "MQTTTest"		// 12 chars max, see get_info_payload()
+#define APP_VERSION "v1.7.0"	// 9 chars max
 
 #ifndef BUILTIN_LED
 #define BUILTIN_LED 2

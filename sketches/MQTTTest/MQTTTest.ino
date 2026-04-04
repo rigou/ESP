@@ -87,7 +87,7 @@ static struct Mqtt_Message {
 // Subscribed topics - function connect() makes the subscriptions:
 //      "MqttClid/Power/set"			HA turns power on/off ('1'=on, '0'=off) of the controlled equipment
 //      "MqttClid/Temp/set" 	        HA sets the temperature on the thermostat of the controlled equipment
-// Published topics - made by functions loop() and publish_device_state():
+// Published topics - made by function publish():
 //      "MqttClid/Power/get"			HA reads power state of of the controlled equipment
 //      "MqttClid/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
 //      "MqttClid/Button/get"           HA reads the push button ('1'=closed, '0'=open)
@@ -174,7 +174,7 @@ void loop() {
 		if (Button_obj.getSingleDebouncedRelease()) {
 			State.Button = !State.Button; // toggle the button state
             State.Changed=true;
-			publish_device_state();
+			publish("Button", State.Button);
 		}
 
         MqttClient_obj.loop();
@@ -185,9 +185,9 @@ void loop() {
         }
 
         // persist the device state into the settings file
-        // update the settings file not faster than once every 60 seconds (Flash memory life = 10.000 writes)
+        // update the settings file not faster than once every 10 seconds (Flash memory life = 10.000 writes)
         static unsigned long Last_file_update=0;
-        if (State.Changed && millis()-Last_file_update>=60000) {
+        if (State.Changed && millis()-Last_file_update>=10000) {
             FPar_obj.SetKeyInt("Power", State.Power);
             FPar_obj.SetKeyInt("Temp", State.Temp);
             FPar_obj.SetKeyInt("Button", State.Button);
@@ -222,6 +222,7 @@ void process_message(void) {
             if (strcmp(topic_suffix, "set") == 0) {
                 State.Power = atoi(Msg.payload);
                 State.Changed = true;
+                publish("Power", State.Power);
                 // set the power of the controlled equipment accordingly
                 digitalWrite(POWERLED_GPIO, State.Power);
             }
@@ -230,10 +231,10 @@ void process_message(void) {
             if (strcmp(topic_suffix, "set") == 0) {
                 State.Temp = atoi(Msg.payload);
                 State.Changed = true;
+                publish("Temp", State.Temp);
                 // set the temperature of the thermostat on the controlled equipment accordingly (not implemented in this example)
             }
         }
-        publish_device_state();
      }
     else {
         dbprintf("process_message() failed: invalid topic %s\n", Msg.fulltopic);
