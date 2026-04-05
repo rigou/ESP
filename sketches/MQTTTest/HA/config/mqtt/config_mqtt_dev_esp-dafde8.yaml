@@ -81,3 +81,11 @@
     state_topic: "esp-dafde8/Button/get"
     qos: *DEF_QOS
     device: *DEVICE 
+
+- sensor:
+    # Receive the online state of the MQTT device
+    unique_id: "esp_dafde8_online"
+    name: "Online"
+    state_topic: "esp-dafde8/Online/get"
+    qos: *DEF_QOS
+    device: *DEVICE 

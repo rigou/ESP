@@ -87,8 +87,9 @@ static struct Mqtt_Message {
 // Subscribed topics - function connect() makes the subscriptions:
 //      "MqttClid/Power/set"			HA turns power on/off ('1'=on, '0'=off) of the controlled equipment
 //      "MqttClid/Temp/set" 	        HA sets the temperature on the thermostat of the controlled equipment
-// Published topics - made by function publish():
-//      "MqttClid/Power/get"			HA reads power state of of the controlled equipment
+// Published topics:
+//      "MqttClid/Online/get"			HA reads our birth message/last will testament during MqttClient_obj.connect() (1=online, 0=offline)
+//      "MqttClid/Power/get"			HA reads power state of the controlled equipment
 //      "MqttClid/Temp/get" 	        HA reads the temperature set on the thermostat of the controlled equipment
 //      "MqttClid/Button/get"           HA reads the push button ('1'=closed, '0'=open)
 //      "MqttClid/Info/get"			    HA reads our status and misc information
@@ -207,10 +208,10 @@ void loop() {
         InterruptDelay(5000);
 }
 
-void subscribe(void) {
+void subscribe_all(void) {
     // add subscriptions here
-    subscribe("Power", "set");
-    subscribe("Temp", "set");         
+    subscribe("Power");
+    subscribe("Temp");         
 }
 
 void process_message(void) {
@@ -271,6 +272,12 @@ char *get_info_payload(void) {
 
 static char Full_Topic_Buffer[FULLTOPIC_LEN+1]; // used by publish() and subscribe()
 
+// Compute the full name of given topic into Full_Topic_Buffer[]
+char *get_full_topic_name(const char* topic_name, const char *suffix) {
+    snprintf(Full_Topic_Buffer, FULLTOPIC_LEN+1, "%s/%s/%s", State.MqttClid, topic_name, suffix);
+    return Full_Topic_Buffer;
+}
+
 // Connect to WiFi if not already done, connect to the MQTT broker and subscribe to topics
 // Return value: true=fully connected to WiFi and MQTT broker
 bool connect() {
@@ -298,9 +305,15 @@ bool connect() {
         dbprintf("%s connected %s\n", State.Hostname, State.LocalIp.toString().c_str());
 
         if (!MqttClient_obj.connected()) {
+            // set our will message (last testament) that gets registered on the broker after connecting
+            // if broker connection is lost, broker will auto-publish this message after 10 seconds
+            // and Home Assistant will be notified (see device configuration file config_mqtt_dev_esp-dafde8.yaml)
+            MqttClient_obj.setWill(get_full_topic_name("Online", "get"), "0", false, 1); // "0"=offline, false=do not retain, qos=1
+            // connect to the MQTT broker
             if (MqttClient_obj.connect(State.MqttClid, MQTT_USER, MQTT_PASSWD)) {
                 dbprintf("%s connected to MQTT broker %s with client ID %s\n", State.Hostname, MQTT_HOST, State.MqttClid);
-                subscribe();
+                publish("Online", "1"); // tell Home Assistant we are online now
+                subscribe_all();
                 retval=true;
             }
             else
@@ -312,15 +325,16 @@ bool connect() {
 
     return retval;
 }
-    
+
 // publish given payload c-string to given topic on the mqtt broker
 // topic_name is the name of the topic, eg "Power", "Switch" ...
 // payload is a null terminated c-string
+// publish with QoS 1 (guaranteed delivery but may have duplicates), and retain message
 bool publish(const char* topic_name, const char* payload) {
     bool retval=false;
-    snprintf(Full_Topic_Buffer, FULLTOPIC_LEN+1, "%s/%s/get", State.MqttClid, topic_name);
+    get_full_topic_name(topic_name, "get");
     dbprintf("publish(%s) : %s \"%s\"\n", topic_name, Full_Topic_Buffer, payload);
-    retval = MqttClient_obj.publish(Full_Topic_Buffer, payload);
+    retval = MqttClient_obj.publish(Full_Topic_Buffer, payload, true, 1); // retain=true, qos=1
     if (!retval)
         dbprintf("publish(%s) failed\n", topic_name);
 	return retval;
@@ -333,15 +347,16 @@ bool publish(const char* topic_name, int payload) {
     return publish(topic_name, payload_str);
 }
 
-bool subscribe(const char *topic_name, const char *suffix) {
+bool subscribe(const char *topic_name) {
     bool retval=false;
-    snprintf(Full_Topic_Buffer, FULLTOPIC_LEN+1, "%s/%s/%s", State.MqttClid, topic_name, suffix);
+    get_full_topic_name(topic_name, "set");
     dbprintf("subscribe(%s) : %s\n", topic_name, Full_Topic_Buffer);
     retval = MqttClient_obj.subscribe(Full_Topic_Buffer);
     if (!retval)
         dbprintf("subscribe(%s) failed\n", topic_name);
     return retval;
 }
+
 
 // parse the full topic of the received message
 // return value: true=ok, false=Msg.fulltopic does not match the expected prefix/topic_name/suffix format
