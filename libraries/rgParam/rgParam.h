@@ -12,7 +12,7 @@
 #include "LittleFS.h"
 
 #define PARAMLIB_NAME "rgParam" // spaces not permitted
-#define PARAMLIB_VERSION "v2.5.3"
+#define PARAMLIB_VERSION "v2.5.4"
 
 // set trace levels: 0=no trace, 1=normal, 2=verbose
 #define RGPARAM_TRACE	1

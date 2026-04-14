@@ -20,6 +20,9 @@
 	format_fs_if_failed_int tells how to process mount errors : 
 		1=try to format the fs and then retry to mount it (default),
 		0=return error
+	max_len_path is the maximum length of a filename like "settings.txt" (possibly prefixed by a folder name like "custom/settings.txt"), 
+		not counting a leading '/' (allowed but not required), nor the trailing '\0'
+	if strlen(path_str) > max_len_path then it will be silently truncated
    Return value: 0=success, 1,2,3 error code : see below
 */
 int rgParam::Init(const char *path_str, 
@@ -41,7 +44,8 @@ int rgParam::Init(const char *path_str,
 	MaxRecords=max_records;
 
 	mBuffer_str=(char *)calloc(RGPARAM_BUFFER_LEN, sizeof(char));
-	mPath_str=(char *)calloc(MaxLenPath+1, sizeof(char));
+	// MaxLenPath+2 chars because +1 for the trailing '\0' and +1 for the leading '/' which set_current_path() will add if not already there
+	mPath_str=(char *)calloc(MaxLenPath+2, sizeof(char)); 
 
 	mKeys_str=(char **)calloc(MaxRecords, sizeof(char *));
 	for (int idx=0; idx<MaxRecords; idx++)
@@ -506,16 +510,15 @@ int rgParam::read_line(File *file_obj, int buffer_size_int, char *buffer_out_str
 	return retval_int;
 }
 
-// path_str absolute path or simple file name, or NULL ; if not NULL then copy it into mPath_str
+// format given path into global buffer mPath_str, with a leading '/' because LittleFS requires absolute path
+// path_str is an absolute path or a simple file name, or NULL
+// if strlen(path_str) >= MaxLenPath+2 then the value copied in mPath_str will be truncated
 void rgParam::set_current_path(const char *path_str) {
 	if (path_str) {
-		if (path_str[0]=='/')
-			strncpy(mPath_str, path_str, MaxLenPath);
-		else {
-			// LittleFS requires absolute path
-			mPath_str[0]='/';
-			strncpy(mPath_str+1, path_str, MaxLenPath-1);
-		}
+		mPath_str[0]='/';
+		byte shift=(path_str[0]=='/')?0:1;
+		strncpy(mPath_str+shift, path_str, MaxLenPath+2-shift);
+		mPath_str[MaxLenPath+1]='\0'; // because if strlen(path_str) >= MaxLenPath+2 then strncpy does not append a null terminator (\0) to mPath_str
 	}
 }
 
