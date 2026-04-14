@@ -357,7 +357,6 @@ bool subscribe(const char *topic_name) {
     return retval;
 }
 
-
 // parse the full topic of the received message
 // return value: true=ok, false=Msg.fulltopic does not match the expected prefix/topic_name/suffix format
 bool parse_topic(const char **topic_name_out, const char **suffix_out) {
