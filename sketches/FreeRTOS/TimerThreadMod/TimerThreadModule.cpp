@@ -1,5 +1,6 @@
-// TimerThread.ino - This example shows how to use a hardware timer on a separate task in ESP32
+// TimerThreadModule.cpp - All time critical code is in this module
 // 2026-04-19
+// derived from the example at https://docs.espressif.com/projects/arduino-esp32/en/latest/api/timer.html
 
 // a more efficient implementation is described here:
 // https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/03-Direct-to-task-notifications/02-As-binary-semaphore
@@ -11,10 +12,6 @@
 // 0=trace off, 1=output to Serial, 2=output to serial UART1()
 #define TRACE_ON 0
 #include <rgDebug.h>
-
-#ifndef BUILTIN_LED
-#define BUILTIN_LED 2
-#endif
 
 // Hardware timer
 hw_timer_t *Timer_obj = NULL;
@@ -30,15 +27,9 @@ volatile uint32_t lastIsrAt = 0;
 // forward declarations
 void ARDUINO_ISR_ATTR onTimer();
 void timertsk(void *pvParameters);
+void process_alarm(void);
 
-void setup() {
-  Serial.begin(921600);
-  while (!Serial);
-	dbprint('\n'); for (uint8_t idx=0; idx<13; idx++) { dbprint((char)('A'+idx)); delay(500); }
-  dbprint('\n');
-
-  pinMode(BUILTIN_LED, OUTPUT);
-  
+void ttm_Setup(void) {
   xTaskCreatePinnedToCore (
     timertsk,   // Function to implement the task
     "timertsk", // Name of the task
@@ -48,7 +39,6 @@ void setup() {
     NULL,       // Task handle.
     0           // Core where the task should run
   );
-
   
   // Create semaphore to inform us when the timer has fired
   // The semaphore is created in the 'empty' state, meaning the semaphore
@@ -68,15 +58,7 @@ void setup() {
   // onTimer() will be called when the counter of Timer_obj reaches this value, and the counter will be reset to 0
   timerAlarm(Timer_obj, TIMER_FREQ/100, true, 0);
 
-  dbprintln("setup complete");
-}
-
-// loops processes actions that are not time-critical
-void loop() {
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(250);  // wait
-  digitalWrite(BUILTIN_LED, LOW);
-  delay(250);  // wait
+  dbprintln("ttm_Setup complete");
 }
 
 void ARDUINO_ISR_ATTR onTimer() {
