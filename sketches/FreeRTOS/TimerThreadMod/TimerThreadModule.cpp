@@ -11,7 +11,14 @@
 #define DEBUG_ON 1
 // 0=trace off, 1=output to Serial, 2=output to serial UART1()
 #define TRACE_ON 0
+
+// You can use an oscilloscope to observe these events (macro defined in rgDebug.h) - define SCOPE_GPIO if you need this
+#define SCOPE_GPIO 21 
 #include <rgDebug.h>
+
+#ifndef BUILTIN_LED
+#define BUILTIN_LED 2
+#endif
 
 // Hardware timer
 hw_timer_t *Timer_obj = NULL;
@@ -30,6 +37,8 @@ void timertsk(void *pvParameters);
 void process_alarm(void);
 
 void ttm_Setup(void) {
+  setupScope();
+
   xTaskCreatePinnedToCore (
     timertsk,   // Function to implement the task
     "timertsk", // Name of the task
@@ -85,6 +94,12 @@ void process_alarm(void) {
   // A block time of zero can be used to poll the semaphore. 
   // Specifying the block time as portMAX_DELAY will cause the task to block indefinitely (without a timeout).
   if (xSemaphoreTake(Semaphore_obj, portMAX_DELAY) == pdTRUE) {
+#ifdef SCOPE_GPIO
+    writeScope(HIGH);
+    delayMicroseconds(1000);
+    writeScope(LOW);
+#endif
+
     uint32_t isrCount = 0;
     uint32_t isrTime = 0;
     
@@ -102,5 +117,13 @@ void process_alarm(void) {
       dbprint(isrTime);
       dbprintln(" ms");
     }
+    
+    // Flash Led
+    if (isrCount % 50 == 0) {
+      static bool Led_state=true;
+      digitalWrite(BUILTIN_LED, Led_state);
+      Led_state=!Led_state;
+    }
+
   }
 }

@@ -31,8 +31,8 @@ void setup() {
 
 // loops processes actions that are not time-critical
 void loop() {
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(250);  // wait
-  digitalWrite(BUILTIN_LED, LOW);
-  delay(250);  // wait
+  // digitalWrite(BUILTIN_LED, HIGH);
+  // delay(250);  // wait
+  // digitalWrite(BUILTIN_LED, LOW);
+  // delay(250);  // wait
 }
