@@ -1,5 +1,5 @@
 // TimerThreadMod.ino - This example shows how to use a hardware timer on a separate task in ESP32,
-// with all time critical code isolates in separate module TimerThreadModule.cpp
+// with all time critical code isolated in separate module TimerThreadModule.cpp
 // 2026-04-19
 
 // a more efficient implementation is described here:
